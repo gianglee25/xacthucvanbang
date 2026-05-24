@@ -324,7 +324,7 @@ const submitData = async (rows: any[]) => {
               <InboxOutlined style={{ color: "#722ed1" }} />
             </p>
             <p className="ant-upload-text font-medium text-gray-600">
-              Kéo thả file Chuẩn (Tất cả các năm) vào đây
+              Kéo thả file vào đây
             </p>
           </Dragger>
         </Card>

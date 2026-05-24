@@ -53,7 +53,6 @@ export default function StudentsClient({ initialData }: { initialData: any[] }) 
         <div className="flex justify-between items-center mb-8 border-b pb-4">
           <div>
             <Title level={2} style={{ margin: 0 }}>QUẢN LÝ SINH VIÊN</Title>
-            <Text type="secondary">Dữ liệu định danh lưu trữ nội bộ (MongoDB)</Text>
           </div>
           <Button type="primary" size="large" onClick={() => setIsModalOpen(true)}>
             + Thêm Sinh Viên Mới

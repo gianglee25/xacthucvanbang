@@ -33,27 +33,21 @@ export async function POST(req: Request) {
     await connectDB();
     const body = await req.json();
 
-    // ✅ Nhận nhiều dạng input: uuid trực tiếp, certHash, hoặc proofString JSON
     let targetUuid: string | undefined;
     let targetHash: string | undefined;
 
     if (body.uuid) {
-      // Gọi trực tiếp từ CertificatesClient (nút Verify)
       targetUuid = body.uuid;
-
     } else if (body.certHash) {
-      // Gọi với certHash thuần (từ VerifyPage khi user dán hash)
       targetHash = body.certHash;
-
     } else if (body.proofString) {
-      // Gọi với proofString — thử parse JSON
       try {
         const parsed = JSON.parse(body.proofString);
         targetUuid = parsed.certUUID || parsed.uuid;
         targetHash = parsed.certHash;
       } catch {
         return NextResponse.json(
-          { success: false, error: "Định dạng minh chứng không hợp lệ. Vui lòng dán đúng Proof JSON." },
+          { success: false, error: "Định dạng minh chứng không hợp lệ." },
           { status: 400 }
         );
       }
@@ -66,7 +60,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Truy vấn MongoDB — ưu tiên uuid, fallback về certHash
     const query = targetUuid ? { uuid: targetUuid } : { certHash: targetHash };
     const certLocal = await Certificate.findOne(query).lean() as any;
 
@@ -77,27 +70,22 @@ export async function POST(req: Request) {
       });
     }
 
-    // 3. Truy vấn blockchain bằng uuid từ DB
     let blockchainResult: any;
     try {
       const response = await executeTransaction("evaluate", "QueryCertificate", certLocal.uuid);
-      blockchainResult =
-        typeof response.result === "string"
-          ? JSON.parse(response.result)
-          : response.result;
+      blockchainResult = typeof response.result === "string" ? JSON.parse(response.result) : response.result;
 
       if (!blockchainResult?.certHash) {
-        throw new Error("Dữ liệu trên Blockchain không hợp lệ hoặc bị thiếu mã Hash.");
+        throw new Error("Dữ liệu trên Blockchain không hợp lệ.");
       }
     } catch (bcError: any) {
-      console.error("Blockchain Query Error:", bcError.message);
       return NextResponse.json({
         success: false,
-        error: "Không tìm thấy bằng chứng khớp với UUID này trên mạng lưới Blockchain!",
+        error: "Không tìm thấy bằng chứng khớp trên mạng lưới Blockchain!",
       });
     }
 
-    // 4. Tính lại hash để đối soát
+    // 4. Tính lại hash để đối soát (Phải khớp 11 tham số như Chaincode)
     const gradeFinal = normalizeGrade(certLocal.grade || "");
     const gpaFinal   = normalizeGpa(certLocal.gpa);
 
@@ -108,6 +96,11 @@ export async function POST(req: Request) {
       certLocal.major || "Không xác định",
       gpaFinal,
       gradeFinal,
+      certLocal.issueDate || "",
+      certLocal.soHieu || "",
+      certLocal.soVaoSo || "",
+      certLocal.className || "",
+      String(certLocal.namTotNghiep || "")
     ].join("|");
 
     const currentLocalHash = crypto
@@ -123,7 +116,7 @@ export async function POST(req: Request) {
       isValid: isAuthentic,
       message: isAuthentic
         ? "Xác thực thành công: Văn bằng chính xác và hợp lệ!"
-        : "CẢNH BÁO: Dữ liệu văn bằng không khớp với bản gốc trên Blockchain!",
+        : "CẢNH BÁO: Dữ liệu văn bằng đã bị thay đổi so với bản gốc!",
       details: {
         studentName:    certLocal.fullName,
         mssv:           certLocal.mssv,
@@ -134,9 +127,8 @@ export async function POST(req: Request) {
       },
     });
   } catch (error: any) {
-    console.error("Verify API Critical Error:", error.message);
     return NextResponse.json(
-      { success: false, error: "Lỗi kết nối máy chủ xác thực: " + error.message },
+      { success: false, error: "Lỗi hệ thống: " + error.message },
       { status: 500 }
     );
   }

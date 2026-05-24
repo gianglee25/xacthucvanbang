@@ -53,9 +53,6 @@ export default function DashboardClient({ stats }: { stats: any }) {
             <Title level={2} style={{ margin: 0, color: "#002140" }}>
               HỆ THỐNG QUẢN TRỊ VĂN BẰNG BLOCKCHAIN
             </Title>
-            <Text type="secondary" style={{ fontSize: "16px" }}>
-              Trường Đại học Thủy lợi | Phân hệ Cán bộ Quản lý
-            </Text>
           </div>
 
           {/* Nút phục hồi dữ liệu - Minh chứng cho tính Self-Healing */}
@@ -68,7 +65,7 @@ export default function DashboardClient({ stats }: { stats: any }) {
             size="large"
             className="shadow-md"
           >
-            Tự chữa lành (Sync từ Blockchain)
+          Sync từ Blockchain
           </Button>
         </div>
 
