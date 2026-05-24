@@ -1,7 +1,10 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
-/node_modules
+# ==========================
+# NODE.JS & NEXT.JS
+# ==========================
+# dependencies (Thêm ** để loại bỏ node_modules ở cả thư mục gốc lẫn thư mục chaincode)
+**/node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -16,32 +19,44 @@
 # next.js
 /.next/
 /out/
-
-# production
 /build
 
-# misc
+# ==========================
+# MISC & DEBUG
+# ==========================
 .DS_Store
 *.pem
-
-# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
 *.tsbuildinfo
 next-env.d.ts
-# Bỏ qua fabric-samples và các file cấu hình mạng
-blockchain-network/fabric-samples/
-blockchain-network/organizations/
 
-# Bỏ qua ví admin (chứa private key)
-wallet/admin.json
+# ==========================
+# MÔI TRƯỜNG & BẢO MẬT (ENV)
+# ==========================
+.env*
+.vercel
+
+# ==========================
+# HYPERLEDGER FABRIC & BLOCKCHAIN (QUAN TRỌNG)
+# ==========================
+# 1. Bỏ qua các file thực thi và bộ cài nhị phân (rất nặng)
+blockchain-network/bin/
+blockchain-network/builders/
+blockchain-network/fabric-samples/
+
+# 2. Bỏ qua toàn bộ ví định danh (Tuyệt đối không push Private Key lên Git)
+wallet/
+# (Chỉ giữ lại file cấu hình ví nếu cần, nhưng không giữ file .json hay .id)
+*.id
+
+# 3. Bỏ qua các thư mục chứa chứng chỉ mật mã (Crypto Materials) sinh ra tự động
+blockchain-network/organizations/
+blockchain-network/channel-artifacts/
+blockchain-network/system-genesis-block/
+
+# 4. Bỏ qua các file đóng gói Smart Contract / Chaincode (file .tar.gz rất nặng)
+*.tar.gz
+*.pkg
