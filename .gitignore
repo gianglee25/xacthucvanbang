@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# Bỏ qua fabric-samples và các file cấu hình mạng
+blockchain-network/fabric-samples/
+blockchain-network/organizations/
+
+# Bỏ qua ví admin (chứa private key)
+wallet/admin.json

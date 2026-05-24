@@ -9,12 +9,26 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.2.2",
+    "@grpc/grpc-js": "^1.14.3",
+    "@hookform/resolvers": "^5.2.2",
+    "@hyperledger/fabric-gateway": "^1.11.0",
+    "antd": "^6.3.7",
+    "bcrypt": "^6.0.0",
+    "fabric-ca-client": "^2.2.20",
+    "fabric-network": "^2.2.20",
+    "mongoose": "^9.6.1",
     "next": "16.2.4",
+    "next-auth": "^4.24.14",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "react-hook-form": "^7.75.0",
+    "xlsx": "^0.18.5",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
