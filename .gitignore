@@ -64,3 +64,4 @@ blockchain-network/system-genesis-block/
 mychannel.block
 enroll-org2.js
 tsconfig.scripts.json
+blockchain-network/bin/
