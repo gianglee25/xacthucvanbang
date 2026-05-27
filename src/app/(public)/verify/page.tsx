@@ -9,30 +9,21 @@ const { TextArea } = Input;
 const { Dragger } = Upload;
 
 // ✅ Parse linh hoạt: nhận JSON proof, UUID thuần, hoặc certHash thuần
-function parseProofInput(raw: string): { uuid?: string; certHash?: string } | null {
+function parseProofInput(raw: string): any | null {
   const s = raw.trim();
   if (!s) return null;
-
-  // Thử parse JSON trước
   try {
     const obj = JSON.parse(s);
     const uuid = obj.certUUID || obj.uuid;
-    const hash = obj.certHash;
-    if (uuid || hash) return { uuid, certHash: hash };
-  } catch {
-    // không phải JSON → tiếp tục
-  }
-
-  // Nếu trông giống UUID (8-4-4-4-12)
+    if (uuid) return { ...obj, uuid };
+    if (obj.certHash) return obj;
+  } catch {}
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)) {
     return { uuid: s };
   }
-
-  // Nếu trông giống SHA256 hash (64 hex chars)
   if (/^[0-9a-f]{64}$/i.test(s)) {
     return { certHash: s };
   }
-
   return null;
 }
 
@@ -78,9 +69,9 @@ export default function VerifyPage() {
       return;
     }
 
-    // Ưu tiên uuid, fallback về certHash
+    // Gửi toàn bộ proof object để verify đúng hash
     if (parsed.uuid) {
-      await executeVerification({ uuid: parsed.uuid });
+      await executeVerification({ ...parsed, uuid: parsed.uuid });
     } else if (parsed.certHash) {
       await executeVerification({ certHash: parsed.certHash });
     }
@@ -132,31 +123,6 @@ export default function VerifyPage() {
           <Button type="primary" block size="large" onClick={handleVerifyProof} loading={loading}>
             Kiểm định
           </Button>
-        </div>
-      ),
-    },
-    {
-      key: '2',
-      label: 'Tải lên bản scan PDF',
-      children: (
-        <div className="mt-4">
-          <Spin spinning={loading} tip="Hệ thống AI đang quét và trích xuất dữ liệu...">
-            <Dragger
-              accept=".pdf"
-              beforeUpload={() => false}
-              onChange={handlePdfUpload}
-              showUploadList={false}
-              className="bg-gray-50 border-2 border-dashed border-blue-400"
-            >
-              <p className="ant-upload-drag-icon pt-4">
-                <InboxOutlined style={{ color: '#1890ff', fontSize: '48px' }} />
-              </p>
-              <p className="ant-upload-text font-semibold pb-2">Kéo thả file PDF văn bằng vào đây</p>
-              <p className="ant-upload-hint pb-4 px-8 text-gray-500">
-                Hệ thống sẽ tự động quét mã QR, chữ ký số hoặc Watermark ẩn trên tài liệu để đối soát với Blockchain.
-              </p>
-            </Dragger>
-          </Spin>
         </div>
       ),
     },

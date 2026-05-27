@@ -22,6 +22,15 @@ interface CertificateData {
   issueDate: string;
   certNo: string;
   txId?: string;
+  fullName?: string;
+  mssv?: string;
+  gpa?: number;
+  grade?: string;
+  soHieu?: string;
+  soVaoSo?: string;
+  className?: string;
+  namTotNghiep?: number;
+  certHash?: string;
 }
 
 interface Props {
@@ -53,11 +62,19 @@ export default function StudentDashboardClient({ initialCertificates }: Props) {
     setTimeout(() => {
       const generatedProof = {
         certUUID: selectedCert?.uuid,
+        fullName: selectedCert?.fullName,
+        mssv: selectedCert?.mssv,
+        major: selectedCert?.major,
+        gpa: selectedCert?.gpa,
+        grade: selectedCert?.grade,
+        issueDate: selectedCert?.issueDate,
+        soHieu: selectedCert?.soHieu,
+        soVaoSo: selectedCert?.soVaoSo,
+        className: selectedCert?.className,
+        namTotNghiep: selectedCert?.namTotNghiep,
+        certHash: selectedCert?.certHash,
+        txId: selectedCert?.txId,
         network: "Hyperledger Fabric - TLU Channel",
-        // Chèn mã giao dịch gốc để người kiểm tra có thể đối soát trên Explorer
-        ledgerTxId: selectedCert?.txId,
-        proof: ['0x54fc...f558', '0x1efa...443'],
-        disclosedData: selectedFields.reduce((acc, field) => ({ ...acc, [field]: 'Verified (Hidden)' }), {})
       };
       
       setProofData(JSON.stringify(generatedProof, null, 2));

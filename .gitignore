@@ -60,3 +60,7 @@ blockchain-network/system-genesis-block/
 # 4. Bỏ qua các file đóng gói Smart Contract / Chaincode (file .tar.gz rất nặng)
 *.tar.gz
 *.pkg
+# Setup artifacts
+mychannel.block
+enroll-org2.js
+tsconfig.scripts.json

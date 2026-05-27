@@ -38,7 +38,16 @@ export default async function StudentDashboardPage() {
     major: cert.major,
     issueDate: cert.issueDate,
     certNo: cert.certNo || cert.uuid,
-    txId: cert.txId
+    txId: cert.txId,
+    fullName: cert.fullName,
+    mssv: cert.mssv,
+    gpa: cert.gpa,
+    grade: cert.grade,
+    soHieu: cert.soHieu,
+    soVaoSo: cert.soVaoSo,
+    className: cert.className,
+    namTotNghiep: cert.namTotNghiep,
+    certHash: cert.certHash,
   }));
 
   // 5. Truyền dữ liệu tĩnh xuống giao diện Client

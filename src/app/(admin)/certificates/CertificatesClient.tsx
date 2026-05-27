@@ -11,13 +11,18 @@ export default function CertificatesClient({ data }: { data: any[] }) {
   // ✅ Tạo proof JSON đầy đủ để copy — gồm uuid + certHash để verify được
   const buildProof = (record: any) =>
     JSON.stringify({
-      certUUID:  record.uuid,
-      certHash:  record.certHash,
-      fullName:  record.fullName,
-      mssv:      record.mssv,
-      major:     record.major,
-      grade:     record.grade,
-      issueDate: record.issueDate,
+      certUUID:     record.uuid,
+      certHash:     record.certHash,
+      fullName:     record.fullName,
+      mssv:         record.mssv,
+      major:        record.major,
+      gpa:          record.gpa,
+      grade:        record.grade,
+      issueDate:    record.issueDate,
+      soHieu:       record.soHieu,
+      soVaoSo:      record.soVaoSo,
+      className:    record.className,
+      namTotNghiep: record.namTotNghiep,
     }, null, 2);
 
   const handleVerify = async (record: any) => {
@@ -26,7 +31,21 @@ export default function CertificatesClient({ data }: { data: any[] }) {
       const res = await fetch("/api/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uuid: record.uuid }),
+        body: JSON.stringify({
+          uuid:         record.uuid,
+          certUUID:     record.uuid,
+          certHash:     record.certHash,
+          fullName:     record.fullName,
+          mssv:         record.mssv,
+          major:        record.major,
+          gpa:          record.gpa,
+          grade:        record.grade,
+          issueDate:    record.issueDate,
+          soHieu:       record.soHieu,
+          soVaoSo:      record.soVaoSo,
+          className:    record.className,
+          namTotNghiep: record.namTotNghiep,
+        }),
       });
       const result = await res.json();
 
