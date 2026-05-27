@@ -5,7 +5,7 @@ import * as fs from "fs";
 
 const channelName = "mychannel";
 const chaincodeName = "educert";
-const BASE = "/home/giang/Documents/datn/blockchain-multiorg";
+const BASE = process.cwd();
 
 const ORG1 = {
   mspId: "Org1MSP",
