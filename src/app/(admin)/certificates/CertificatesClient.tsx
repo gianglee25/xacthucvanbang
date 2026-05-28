@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { generateCertPDF } from "@/lib/generateCertPDF";
 import { Table, Button, Typography, Tag, message, Modal, Space, Tooltip } from "antd";
 import { CopyOutlined, SafetyCertificateOutlined, CheckCircleFilled, CloseCircleFilled, QrcodeOutlined } from "@ant-design/icons";
 import QRCode from "react-qr-code";
@@ -175,6 +176,17 @@ export default function CertificatesClient({ data }: { data: any[] }) {
               onClick={() => setQrRecord(record)}
             >
               QR Code
+            </Button>
+          </Tooltip>
+          <Tooltip title="Tải PDF văn bằng số có QR Code">
+            <Button
+              size="small"
+              onClick={async () => {
+                const url = `${window.location.origin}/verify?proof=${encodeURIComponent(buildProof(record))}`;
+                await generateCertPDF(record, url);
+              }}
+            >
+              PDF
             </Button>
           </Tooltip>
         </Space>
