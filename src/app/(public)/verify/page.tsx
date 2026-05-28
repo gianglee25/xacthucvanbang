@@ -94,26 +94,54 @@ function VerifyContent() {
   };
 
   // Tab 2: upload PDF (giữ nguyên logic cũ)
-  const handlePdfUpload = (info: any) => {
-    const file = info.file;
+  const handlePdfUpload = async (info: any) => {
+    const file = info.file as File;
     setLoading(true);
     setErrorMsg('');
     setCertData(null);
     setVerifyResult(null);
-
-    setTimeout(() => {
-      const mssvMatch = file.name.match(/\d{8,10}/);
-      const extractedMssv = mssvMatch ? mssvMatch[0] : null;
-
-      if (extractedMssv) {
-        message.success(`Đã quét thành công dữ liệu mã: ${extractedMssv}`);
-        executeVerification({ mssv: extractedMssv });
-      } else {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdfjsLib = await import('pdfjs-dist');
+      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.mjs", import.meta.url).toString();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const page = await pdf.getPage(1);
+      const viewport = page.getViewport({ scale: 3.0 });
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      const ctx = canvas.getContext('2d')!;
+      await page.render({ canvasContext: ctx, viewport }).promise;
+      const jsQR = (await import('jsqr')).default;
+      // Đọc proof từ metadata PDF (subject field)
+      const metadata = await pdf.getMetadata();
+      const subject = (metadata?.info as any)?.Subject || '';
+      
+      console.log('Metadata subject:', subject);
+      let qrText = subject;
+      if (!qrText) {
         setLoading(false);
-        setErrorMsg('Tài liệu mờ hoặc không chứa chữ ký số/QR code hợp lệ. Vui lòng thử lại!');
+        setErrorMsg('PDF không chứa thông tin xác thực. Hãy dùng PDF được tạo từ hệ thống này.');
+        return false;
       }
-    }, 2000);
-
+      let proof = null;
+      try {
+        const url = new URL(qrText);
+        const proofParam = url.searchParams.get('proof');
+        if (proofParam) proof = JSON.parse(decodeURIComponent(proofParam));
+      } catch { try { proof = JSON.parse(qrText); } catch {} }
+      if (!proof || (!proof.certUUID && !proof.uuid)) {
+        setLoading(false);
+        setErrorMsg('QR code khong chua thong tin van bang hop le.');
+        return false;
+      }
+      message.success('Da doc QR code tu PDF thanh cong!');
+      const uuid = proof.certUUID || proof.uuid;
+      await executeVerification({ ...proof, uuid });
+    } catch (err) {
+      setLoading(false);
+      setErrorMsg('Loi doc PDF: ' + String(err));
+    }
     return false;
   };
 
@@ -185,6 +213,11 @@ function VerifyContent() {
             onClick={() => setActiveTab('qr')}
             style={{flex:1}}
           >📷 Quét QR</Button>
+          <Button 
+            type={activeTab==='pdf' ? 'primary' : 'default'} 
+            onClick={() => setActiveTab('pdf')}
+            style={{flex:1}}
+          >📁 Upload PDF</Button>
         </div>
         {activeTab === 'proof' && (
           <div className="mt-4">
@@ -250,6 +283,19 @@ function VerifyContent() {
                 <Button className="mt-4 w-full" onClick={() => setScanning(false)}>Hủy quét</Button>
               </div>
             )}
+          </div>
+        )}
+        {activeTab === 'pdf' && (
+          <div className="mt-4">
+            <Dragger
+              accept=".pdf"
+              beforeUpload={(file) => { handlePdfUpload({file}); return false; }}
+              showUploadList={false}
+            >
+              <p className="ant-upload-drag-icon"><InboxOutlined /></p>
+              <p>Kéo thả hoặc nhấn để upload PDF văn bằng</p>
+              <p className="text-gray-400 text-sm">Hệ thống sẽ tự động đọc QR code trong PDF</p>
+            </Dragger>
           </div>
         )}
 

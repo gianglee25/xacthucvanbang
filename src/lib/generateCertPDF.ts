@@ -96,5 +96,26 @@ export async function generateCertPDF(record: any, verifyUrl: string) {
   const imgData = canvas.toDataURL('image/png');
   const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   pdf.addImage(imgData, 'PNG', 0, 0, 297, 210);
+  
+  // Nhúng proof vào metadata PDF để đọc được khi upload
+  pdf.setProperties({
+    title: 'Van Bang Tot Nghiep - ' + record.fullName,
+    subject: JSON.stringify({
+      certUUID: record.uuid,
+      certHash: record.certHash,
+      fullName: record.fullName,
+      mssv: record.mssv,
+      major: record.major,
+      gpa: record.gpa,
+      grade: record.grade,
+      issueDate: record.issueDate,
+      soHieu: record.soHieu,
+      soVaoSo: record.soVaoSo,
+      className: record.className,
+      namTotNghiep: record.namTotNghiep,
+    }),
+    author: 'Truong Dai hoc Thuy Loi',
+    keywords: record.certHash,
+  });
   pdf.save(`VanBang_${record.mssv}_${record.soHieu}.pdf`);
 }
