@@ -178,7 +178,8 @@ export default function DashboardClient({ stats }: { stats: any }) {
               path: "/certificates",
               color: "#d48806",
             },
-            { name: "Nhập liệu Excel", path: "/import", color: "#722ed1" },
+            { name: "Import Văn bằng", path: "/import", color: "#722ed1" },
+            { name: "Import Sinh viên", path: "/students/import", color: "#13c2c2" },
           ].map((m) => (
             <Col xs={24} sm={6} key={m.path}>
               <Card
