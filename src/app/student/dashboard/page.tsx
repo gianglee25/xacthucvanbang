@@ -12,7 +12,7 @@ export default async function StudentDashboardPage() {
   // 1. Kiểm tra xác thực (Bảo vệ Route)
   const session = await getServerSession(authOptions);
   
-  if (!session || (session.user as any).role !== 'STUDENT') {
+  if (!session || (session.user as any).role?.toUpperCase() !== 'STUDENT') {
     redirect('/login');
   }
 
@@ -28,7 +28,7 @@ export default async function StudentDashboardPage() {
   // (Trong thực tế, bạn có thể map qua MSSV thay vì fullName/email)
   const rawCertificates = await Certificate.find({ 
     fullName: studentInfo?.name,
-    status: 'ISSUED' // Chỉ hiện văn bằng đã có trên Blockchain
+    status: 'ON_CHAIN' // Chỉ hiện văn bằng đã có trên Blockchain
   }).lean();
 
   // 4. Chuẩn hóa dữ liệu để gửi xuống Client
