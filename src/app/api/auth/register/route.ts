@@ -27,9 +27,9 @@ export async function POST(req: Request) {
 
             // ĐỐI CHIẾU CHÉO (CROSS-CHECK): Tìm sinh viên đã được nhà trường Import
             const existingStudent = await User.findOne({ 
-                mssv: mssv, 
+                $or: [{ mssv: mssv }, { fabricEnrollmentId: mssv }],
                 email: email,
-                role: { $regex: new RegExp('^student$', 'i') } // Không phân biệt hoa thường
+                role: { $regex: new RegExp('^student$', 'i') }
             });
 
             if (!existingStudent) {

@@ -156,4 +156,33 @@ export class CertContract extends Contract {
     }
     return JSON.stringify(allResults);
   }
+  @Transaction(false)
+  public async GetCertificateHistory(ctx: Context, certUUID: string): Promise<string> {
+    const iterator = await ctx.stub.getHistoryForKey(certUUID);
+    const history = [];
+
+    while (true) {
+      const result = await iterator.next();
+      if (result.done) break;
+
+      const record: any = {
+        txId: result.value.txId,
+        timestamp: result.value.timestamp,
+        isDelete: result.value.isDelete,
+      };
+
+      if (!result.value.isDelete && result.value.value) {
+        try {
+          record.data = JSON.parse(result.value.value.toString());
+        } catch {
+          record.data = result.value.value.toString();
+        }
+      }
+
+      history.push(record);
+    }
+
+    await iterator.close();
+    return JSON.stringify(history);
+  }
 }

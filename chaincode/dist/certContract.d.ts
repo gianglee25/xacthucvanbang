@@ -8,4 +8,5 @@ export declare class CertContract extends Contract {
     QueryCertificate(ctx: Context, certUUID: string): Promise<string>;
     CertificateExists(ctx: Context, certUUID: string): Promise<boolean>;
     QueryAllCertificates(ctx: Context): Promise<string>;
+    GetCertificateHistory(ctx: Context, certUUID: string): Promise<string>;
 }

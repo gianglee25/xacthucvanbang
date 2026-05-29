@@ -145,6 +145,13 @@ export async function POST(req: Request) {
       details: {
         studentName:    certDB.fullName,
         mssv:           certDB.mssv,
+        major:          certDB.major,
+        gpa:            certDB.gpa,
+        grade:          certDB.grade,
+        issueDate:      certDB.issueDate,
+        soHieu:         certDB.soHieu,
+        namTotNghiep:   certDB.namTotNghiep,
+        txId:           certDB.txId,
         onChainHash,
         proofHash,
         dbHash,

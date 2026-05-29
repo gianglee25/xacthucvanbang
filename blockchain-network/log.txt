@@ -1,2 +1,1 @@
-Committed chaincode definition for chaincode 'educert' on channel 'mychannel':
-Version: 1.0, Sequence: 2, Endorsement Plugin: escc, Validation Plugin: vscc, Approvals: [Org1MSP: true, Org2MSP: true]
+Error: proposal failed with status: 500 - failed to invoke backing implementation of 'ApproveChaincodeDefinitionForMyOrg': attempted to redefine the current committed sequence (3) for namespace educert with different parameters: expected ValidationParameter '0a2c120c120a080212020800120208011a0d120b0a074f7267314d535010031a0d120b0a074f7267324d53501003' does not match passed ValidationParameter '12202f4368616e6e656c2f4170706c69636174696f6e2f456e646f7273656d656e74'

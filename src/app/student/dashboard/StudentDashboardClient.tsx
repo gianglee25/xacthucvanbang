@@ -143,16 +143,46 @@ export default function StudentDashboardClient({ initialCertificates }: Props) {
                   </div>
                 </Col>
 
+                <Col xs={24} sm={12} md={8}>
+                  <Text type="secondary" className="text-xs font-semibold tracking-wider">GPA</Text>
+                  <div className="font-semibold text-gray-800">{cert.gpa}</div>
+                </Col>
+                <Col xs={24} sm={12} md={8}>
+                  <Text type="secondary" className="text-xs font-semibold tracking-wider">XẾP LOẠI</Text>
+                  <div className="font-semibold text-blue-600">{cert.grade}</div>
+                </Col>
+                <Col xs={24} sm={12} md={8}>
+                  <Text type="secondary" className="text-xs font-semibold tracking-wider">NĂM TỐT NGHIỆP</Text>
+                  <div className="font-semibold text-gray-800">{cert.namTotNghiep}</div>
+                </Col>
                 <Col span={24} className="text-right mt-4 border-t border-gray-100 pt-4">
-                  <Button 
-                    type="primary" 
-                    size="large"
-                    icon={<ShareAltOutlined />}
-                    onClick={() => openShareModal(cert)}
-                    className="rounded-md bg-blue-600 font-medium"
-                  >
-                    Chia sẻ minh chứng mật mã
-                  </Button>
+                  <Space>
+                    <Button
+                      size="large"
+                      onClick={async () => {
+                        const verifyUrl = `${window.location.origin}/verify?proof=${encodeURIComponent(JSON.stringify({
+                          certUUID: cert.uuid, certHash: cert.certHash,
+                          fullName: cert.fullName, mssv: cert.mssv,
+                          major: cert.major, gpa: cert.gpa, grade: cert.grade,
+                          issueDate: cert.issueDate, soHieu: cert.soHieu,
+                          soVaoSo: cert.soVaoSo, className: cert.className,
+                          namTotNghiep: cert.namTotNghiep,
+                        }))}`;
+                        await generateCertPDF(cert, verifyUrl);
+                      }}
+                    >
+                      📄 Tải PDF
+                    </Button>
+                    <Button 
+                      type="primary" 
+                      size="large"
+                      icon={<ShareAltOutlined />}
+                      onClick={() => openShareModal(cert)}
+                      className="rounded-md bg-blue-600 font-medium"
+                    >
+                      Chia sẻ minh chứng
+                    </Button>
+                  </Space>
                 </Col>
               </Row>
             </Card>
