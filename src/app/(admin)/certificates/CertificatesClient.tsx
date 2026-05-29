@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { generateCertPDF } from "@/lib/generateCertPDF";
-import { Table, Button, Typography, Tag, message, Modal, Space, Tooltip } from "antd";
+import { Table, Button, Typography, Tag, message, Modal, Space, Tooltip, Timeline, Spin } from "antd";
 import { CopyOutlined, SafetyCertificateOutlined, CheckCircleFilled, CloseCircleFilled, QrcodeOutlined } from "@ant-design/icons";
 import QRCode from "react-qr-code";
 
@@ -10,8 +10,24 @@ const { Text } = Typography;
 export default function CertificatesClient({ data }: { data: any[] }) {
   const [loadingVerify, setLoadingVerify] = useState<Record<string, boolean>>({});
   const [qrRecord, setQrRecord] = useState<any>(null);
+  const [auditRecord, setAuditRecord] = useState<any>(null);
+  const [auditHistory, setAuditHistory] = useState<any[]>([]);
+  const [auditLoading, setAuditLoading] = useState(false);
 
   // ✅ Tạo proof JSON đầy đủ để copy — gồm uuid + certHash để verify được
+  React.useEffect(() => {
+    if (!auditRecord) return;
+    setAuditLoading(true);
+    setAuditHistory([]);
+    fetch(`/api/audit?certUUID=${auditRecord.uuid}`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) setAuditHistory(d.history);
+        else message.error('Lỗi: ' + d.error);
+      })
+      .finally(() => setAuditLoading(false));
+  }, [auditRecord]);
+
   const buildProof = (record: any) =>
     JSON.stringify({
       certUUID:     record.uuid,
@@ -189,6 +205,14 @@ export default function CertificatesClient({ data }: { data: any[] }) {
               PDF
             </Button>
           </Tooltip>
+          <Tooltip title="Xem lịch sử giao dịch trên Blockchain">
+            <Button
+              size="small"
+              onClick={() => setAuditRecord(record)}
+            >
+              Audit
+            </Button>
+          </Tooltip>
         </Space>
       ),
     },
@@ -241,6 +265,37 @@ export default function CertificatesClient({ data }: { data: any[] }) {
         />
       </div>
     </div>
+    <Modal
+      open={!!auditRecord}
+      onCancel={() => { setAuditRecord(null); setAuditHistory([]); }}
+      footer={null}
+      title={auditRecord ? `Audit Trail — ${auditRecord.fullName}` : ""}
+      width={700}
+      centered
+    >
+      {auditLoading ? (
+        <div className="text-center py-8"><Spin size="large" /></div>
+      ) : (
+        <div className="p-4">
+          <Timeline
+            items={auditHistory.map((h, i) => ({
+              color: i === 0 ? 'green' : 'blue',
+              children: (
+                <div key={h.txId}>
+                  <div className="font-bold text-sm">{i === 0 ? '✅ Giao dịch mới nhất' : `Giao dịch #${auditHistory.length - i}`}</div>
+                  <div className="text-xs text-gray-500 mt-1">TxID: <code>{h.txId}</code></div>
+                  <div className="text-xs text-gray-500">Thời gian: {h.timestamp ? new Date(h.timestamp.seconds * 1000).toLocaleString('vi-VN') : 'N/A'}</div>
+                  <div className="text-xs text-gray-500">Thao tác: {h.isDelete ? '🗑️ Xóa' : '📝 Ghi'}</div>
+                </div>
+              )
+            }))}
+          />
+          {auditHistory.length === 0 && !auditLoading && (
+            <div className="text-center text-gray-400 py-4">Không có lịch sử giao dịch</div>
+          )}
+        </div>
+      )}
+    </Modal>
     </>
   );
 }

@@ -132,6 +132,31 @@ let CertContract = class CertContract extends fabric_contract_api_1.Contract {
         }
         return JSON.stringify(allResults);
     }
+    async GetCertificateHistory(ctx, certUUID) {
+        const iterator = await ctx.stub.getHistoryForKey(certUUID);
+        const history = [];
+        while (true) {
+            const result = await iterator.next();
+            if (result.done)
+                break;
+            const record = {
+                txId: result.value.txId,
+                timestamp: result.value.timestamp,
+                isDelete: result.value.isDelete,
+            };
+            if (!result.value.isDelete && result.value.value) {
+                try {
+                    record.data = JSON.parse(result.value.value.toString());
+                }
+                catch (_a) {
+                    record.data = result.value.value.toString();
+                }
+            }
+            history.push(record);
+        }
+        await iterator.close();
+        return JSON.stringify(history);
+    }
 };
 __decorate([
     (0, fabric_contract_api_1.Transaction)(),
@@ -168,6 +193,12 @@ __decorate([
     __metadata("design:paramtypes", [fabric_contract_api_1.Context]),
     __metadata("design:returntype", Promise)
 ], CertContract.prototype, "QueryAllCertificates", null);
+__decorate([
+    (0, fabric_contract_api_1.Transaction)(false),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [fabric_contract_api_1.Context, String]),
+    __metadata("design:returntype", Promise)
+], CertContract.prototype, "GetCertificateHistory", null);
 CertContract = __decorate([
     (0, fabric_contract_api_1.Info)({
         title: "CertContract",
