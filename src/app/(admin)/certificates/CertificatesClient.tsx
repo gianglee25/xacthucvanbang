@@ -1,12 +1,15 @@
 "use client";
 import React, { useState } from "react";
+import { generateCertPDF } from "@/lib/generateCertPDF";
 import { Table, Button, Typography, Tag, message, Modal, Space, Tooltip } from "antd";
-import { CopyOutlined, SafetyCertificateOutlined, CheckCircleFilled, CloseCircleFilled } from "@ant-design/icons";
+import { CopyOutlined, SafetyCertificateOutlined, CheckCircleFilled, CloseCircleFilled, QrcodeOutlined } from "@ant-design/icons";
+import QRCode from "react-qr-code";
 
 const { Text } = Typography;
 
 export default function CertificatesClient({ data }: { data: any[] }) {
   const [loadingVerify, setLoadingVerify] = useState<Record<string, boolean>>({});
+  const [qrRecord, setQrRecord] = useState<any>(null);
 
   // ✅ Tạo proof JSON đầy đủ để copy — gồm uuid + certHash để verify được
   const buildProof = (record: any) =>
@@ -166,12 +169,59 @@ export default function CertificatesClient({ data }: { data: any[] }) {
               Copy Proof
             </Button>
           </Tooltip>
+          <Tooltip title="Hiển thị QR Code để quét xác thực">
+            <Button
+              icon={<QrcodeOutlined />}
+              size="small"
+              onClick={() => setQrRecord(record)}
+            >
+              QR Code
+            </Button>
+          </Tooltip>
+          <Tooltip title="Tải PDF văn bằng số có QR Code">
+            <Button
+              size="small"
+              onClick={async () => {
+                const url = `${window.location.origin}/verify?proof=${encodeURIComponent(buildProof(record))}`;
+                await generateCertPDF(record, url);
+              }}
+            >
+              PDF
+            </Button>
+          </Tooltip>
         </Space>
       ),
     },
   ];
 
+  const verifyUrl = qrRecord
+    ? `${window.location.origin}/verify?proof=${encodeURIComponent(buildProof(qrRecord))}`
+    : "";
+
   return (
+    <>
+    <Modal
+      open={!!qrRecord}
+      onCancel={() => setQrRecord(null)}
+      footer={null}
+      title={qrRecord ? `QR Code — ${qrRecord.fullName}` : ""}
+      centered
+    >
+      {qrRecord && (
+        <div className="flex flex-col items-center gap-4 p-4">
+          <QRCode value={verifyUrl} size={300} style={{height:"auto", maxWidth:"100%", width:"100%"}}/>
+          <Typography.Text type="secondary" className="text-center text-xs">
+            Quét QR để xác thực văn bằng tại trang công khai
+          </Typography.Text>
+          <Button
+            icon={<CopyOutlined />}
+            onClick={() => { navigator.clipboard.writeText(verifyUrl); message.success("Đã copy link xác thực!"); }}
+          >
+            Copy Link
+          </Button>
+        </div>
+      )}
+    </Modal>
     <div className="p-8 bg-white min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
@@ -191,5 +241,6 @@ export default function CertificatesClient({ data }: { data: any[] }) {
         />
       </div>
     </div>
+    </>
   );
 }
