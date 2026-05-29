@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer, Legend } from "recharts";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   Row,
@@ -22,6 +23,15 @@ const { Title, Text } = Typography;
 
 export default function DashboardClient({ stats }: { stats: any }) {
   const [isSyncing, setIsSyncing] = useState(false);
+  const [chartData, setChartData] = useState<any>(null);
+
+  useEffect(() => {
+    fetch('/api/statistics')
+      .then(r => r.json())
+      .then(d => { if (d.success) setChartData(d.data); });
+  }, []);
+
+  const COLORS = ['#0056b3', '#52c41a', '#faad14', '#f5222d', '#722ed1', '#13c2c2', '#eb2f96', '#fa8c16'];
 
   // Logic phục hồi dữ liệu từ Blockchain
   const handleSync = async () => {
@@ -112,6 +122,52 @@ export default function DashboardClient({ stats }: { stats: any }) {
           </Col>
         </Row>
 
+        {/* Biểu đồ thống kê */}
+        {chartData && (
+          <Row gutter={24} className="mb-12">
+            <Col span={12}>
+              <Card title="Top 10 ngành học" variant="borderless" className="bg-gray-50">
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={chartData.byMajor} layout="vertical" margin={{left: 20}}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis type="category" dataKey="name" width={160} tick={{fontSize: 11}} />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#0056b3" name="Số văn bằng" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Card>
+            </Col>
+            <Col span={6}>
+              <Card title="Phân bố xếp loại" variant="borderless" className="bg-gray-50">
+                <ResponsiveContainer width="100%" height={280}>
+                  <PieChart>
+                    <Pie data={chartData.byGrade} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({name, percent}) => `${(percent*100).toFixed(0)}%`}>
+                      {chartData.byGrade.map((_: any, i: number) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Card>
+            </Col>
+            <Col span={6}>
+              <Card title="Văn bằng theo năm" variant="borderless" className="bg-gray-50">
+                <ResponsiveContainer width="100%" height={280}>
+                  <LineChart data={chartData.byYear}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="year" tick={{fontSize: 11}} />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="count" stroke="#0056b3" strokeWidth={2} dot={false} name="Số văn bằng" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Card>
+            </Col>
+          </Row>
+        )}
         {/* Các nút điều hướng */}
         <Row gutter={[24, 24]}>
           {[
